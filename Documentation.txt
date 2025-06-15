@@ -1,0 +1,2085 @@
+# Strudel Live Coding Environment Documentation
+
+Welcome to the Strudel documentation pages! You’ve come to the right place if you want to learn how to make music with code.
+
+## What is Strudel?
+
+With Strudel, you can expressively write dynamic music pieces.
+It is an official port of the Tidal Cycles pattern language to JavaScript.
+You don’t need to know JavaScript or Tidal Cycles to make music with Strudel. This interactive tutorial will guide you through the basics of Strudel.
+The best place to actually make music with Strudel is the Strudel REPL
+
+What can you do with Strudel?
+*   live code music: make music with code in real time
+*   algorithmic composition: compose music using tidal’s unique approach to pattern manipulation
+*   teaching: focussing on a low barrier of entry, Strudel is a good fit for teaching music and code at the same time.
+*   integrate into your existing music setup: either via MIDI or OSC, you can use Strudel as a really flexible sequencer
+
+Examples
+
+Here are some examples of how strudel can sound:
+
+```javascript
+// "coastline" @by eddyflux
+// @version 1.0
+samples('github:eddyflux/crate')
+setcps(.75)
+let chords = chord("<Bbm9 Fm9>/4").dict('ireal')
+stack(
+  stack( // DRUMS
+    s("bd").struct("<[x*<1 2> [~@3 x]] x>"),
+    s("~ [rim, sd:<2 3>]").room("<0 .2>"),
+    n("[0 <1 3>]*<2!3 4>").s("hh"),
+    s("rd:<1!3 2>*2").mask("<0 0 1 1>/16").gain(.5)
+  ).bank('crate')
+  .mask("<[0 1] 1 1 1>/16".early(.5))
+  , // CHORDS
+  chords.offset(-1).voicing().s("gm_epiano1:1")
+  .phaser(4).room(.5)
+  , // MELODY
+  n("<0!3 1*2>").set(chords).mode("root:g2")
+  .voicing().s("gm_acoustic_bass"),
+  chords.n("[0 <4 3 <2 5>>*2](<3 5>,8)")
+  .anchor("D5").voicing()
+  .segment(4).clip(rand.range(.4,.8))
+  .room(.75).shape(.3).delay(.25)
+  .fm(sine.range(3,8).slow(8))
+  .lpf(sine.range(500,1000).slow(8)).lpq(5)
+  .rarely(ply("2")).chunk(4, fast(2))
+  .gain(perlin.range(.6, .9))
+  .mask("<0 1 1 0>/16")
+)
+.late("[0 .01]*4").late("[0 .01]*2").size(4)
+```
+
+These examples cannot fully encompass the variety of things you can do, so check out the showcase for some videos of how people use Strudel.
+
+---
+
+## Workshop
+
+### First Sounds
+
+This is the first chapter of the Strudel Workshop, nice to have you on board!
+
+Code Fields
+
+The workshop is full of interactive code fields. Let’s learn how to use those. Here is one:
+
+```javascript
+sound("casio")
+```
+⬆️ click into the text field above ⬆️
+press ctrl+enter to play
+change `casio` to `metal`
+press ctrl+enter to update
+press ctrl+. to stop
+
+Congratulations, you are now live coding!
+
+Sounds
+
+We have just played a sound with `sound` like this:
+
+```javascript
+sound("casio")
+```
+
+`casio` is one of many standard sounds.
+
+Try out a few other sounds:
+
+*   `insect`
+*   `wind`
+*   `jazz`
+*   `metal`
+*   `east`
+*   `crow`
+*   `casio`
+*   `space`
+*   `numbers`
+
+You might hear a little pause while the sound is loading
+
+Change Sample Number with `:`
+
+One Sound can contain multiple samples (audio files).
+
+You can select the sample by appending `:` followed by a number to the name:
+
+```javascript
+sound("casio:1")
+```
+
+Try different sound / sample number combinations.
+
+Not adding a number is like doing `:0`
+
+Now you know how to use different sounds. For now we’ll stick to this little selection of sounds, but we’ll find out how to load your own sounds later.
+
+Drum Sounds
+
+By default, Strudel comes with a wide selection of drum sounds:
+
+```javascript
+sound("bd hh sd oh")
+```
+
+These letter combinations stand for different parts of a drum set:
+
+- bd = bass drum
+- sd = snare drum
+- rim = rimshot
+- hh = hihat
+- oh = open hihat
+- lt = low tom
+- mt = middle tom
+- ht = high tom
+- rd = ride cymbal
+- cr = crash cymbal
+
+Try out different drum sounds!
+
+To change the sound character of our drums, we can use `bank` to change the drum machine:
+
+```javascript
+sound("bd hh sd oh").bank("RolandTR909")
+```
+
+In this example `RolandTR909` is the name of the drum machine that we’re using. It is a famous drum machine for house and techno beats.
+
+Try changing `RolandTR909` to one of
+
+*   AkaiLinn
+*   RhythmAce
+*   RolandTR808
+*   RolandTR707
+*   ViscoSpaceDrum
+
+There are a lot more, but let’s keep it simple for now
+
+🦥 *Pro-Tip:* Mark a name via double click. Then just copy and paste!
+
+Sequences
+
+In the last example, we already saw that you can play multiple sounds in a sequence by separating them with a space:
+
+```javascript
+sound("bd hh sd hh")
+```
+
+Notice how the currently playing sound is highlighted in the code and also visualized below.
+
+Try adding more sounds to the sequence!
+
+The longer the sequence, the faster it runs
+
+```javascript
+sound("bd bd hh bd rim bd hh bd")
+```
+
+The content of a sequence will be squished into what’s called a *cycle*. A cycle is 2s long by default.
+
+One per cycle with `< .. >`
+
+Here is the same sequence, but this time sourrounded with `< .. >` (angle brackets):
+
+```javascript
+sound("<bd bd hh bd rim bd hh bd>")
+```
+
+This will play only one sound per cycle. With these brackets, the tempo doesn’t change when we add or remove elements!
+
+Because this is now very slow, we can speed it up again like this:
+
+```javascript
+sound("<bd bd hh bd rim bd hh bd>*8")
+```
+
+Here, the `*8` means we make the whole thing 8 times faster.
+
+*Wait a minute, isn’t this the same as without < ... >*8? Why do we need it then?*
+
+That’s true, the special thing about this notation is that the tempo won’t change when you add or remove elements, try it!
+
+Try also changing the number at the end to change the tempo!
+
+changing the tempo with `cpm`
+
+```javascript
+sound("<bd hh rim hh>*8").cpm(90/4)
+```
+
+`cpm` = cycles per minute
+
+By default, the tempo is 30 cycles per minute = 120/4 = 1 cycle every 2 seconds
+
+In western music terms, you could say the above are 8ths notes at 90bpm in 4/4 time. But don’t worry if you don’t know these terms, as they are not required to make music with Strudel.
+
+Add a rests in a sequence with ’-’ or ’~’
+
+```javascript
+sound("bd hh - rim - bd hh rim")
+```
+
+Sub-Sequences with [brackets]
+
+```javascript
+sound("bd [hh hh] sd [hh bd] bd - [hh sd] cp")
+```
+
+Try adding more sounds inside a bracket!
+
+Similar to the whole sequence, the content of a sub-sequence will be squished to its own length.
+
+Multiplication: Speed things up
+
+```javascript
+sound("bd hh*2 rim hh*3 bd [- hh*2] rim hh*2")
+```
+
+Multiplication: Speed up subsequences
+
+```javascript
+sound("bd [hh rim]*2 bd [hh rim]*1.5")
+```
+
+Multiplication: Speeeeeeeeed things up
+
+```javascript
+sound("bd hh*32 rim hh*16")
+```
+
+*Pitch = really fast rhythm*
+
+Sub-Sub-Sequences with [[brackets]]
+
+```javascript
+sound("bd [[rim rim] hh] bd cp")
+```
+
+You can go as deep as you want!
+
+Play sequences in parallel with comma
+
+```javascript
+sound("hh hh hh, bd casio")
+```
+
+You can use as many commas as you want:
+
+```javascript
+sound("hh hh hh, bd bd, - casio")
+```
+
+Commas can also be used inside sub-sequences:
+
+```javascript
+sound("hh hh hh, bd [bd,casio]")
+```
+
+Notice how the 2 above are the same?
+
+It is quite common that there are many ways to express the same idea.
+
+Multiple Lines with backticks
+
+```javascript
+sound(`bd*2, - cp,
+- - - oh, hh*4,
+[- casio]*2`)
+```
+
+selecting sample numbers separately
+
+Instead of using ”:”, we can also use the `n` function to select sample numbers:
+
+```javascript
+n("0 1 [4 2] 3*2").sound("jazz")
+```
+
+This is shorter and more readable than:
+
+```javascript
+sound("jazz:0 jazz:1 [jazz:4 jazz:2] jazz:3*2")
+```
+
+Examples
+
+Basic rock beat
+
+```javascript
+sound("[bd sd]*2, hh*8").bank("RolandTR505")
+.cpm(100/4)
+```
+
+Classic house
+
+```javascript
+sound("bd*4, [- cp]*2, [- hh]*4").bank("RolandTR909")
+```
+
+Notice that the two patterns are extremely similar. Certain drum patterns are reused across genres.
+
+We Will Rock you
+
+```javascript
+sound("bd*2 cp").bank("RolandTR707").cpm(81/2)
+```
+
+Yellow Magic Orchestra - Firecracker
+
+```javascript
+sound("bd sd, - - - hh - hh - -, - perc - perc:1*2")
+.bank("RolandCompurhythm1000").cpm(120/2)
+```
+
+Imitation of a 16 step sequencer
+
+```javascript
+sound(`
+[-  -  oh - ] [-  -  -  - ] [-  -  -  - ] [-  -  -  - ],
+[hh hh -  - ] [hh -  hh - ] [hh -  hh - ] [hh -  hh - ],
+[-  -  -  - ] [cp -  -  - ] [-  -  -  - ] [cp -  -  - ],
+[bd -  -  - ] [-  -  -  bd] [-  -  bd - ] [-  -  -  bd]
+`).cpm(90/4)
+```
+
+Another one
+
+```javascript
+sound(`
+[-  -  -  - ] [-  -  -  - ] [-  -  -  - ] [-  -  oh:1 - ],
+[hh hh hh hh] [hh hh hh hh] [hh hh hh hh] [hh hh -  - ],
+[-  -  -  - ] [cp -  -  - ] [-  -  -  - ] [~  cp -  - ],
+[bd bd -  - ] [-  -  bd - ] [bd bd - bd ] [-  -  -  - ]
+`).bank("RolandTR808").cpm(88/4)
+```
+
+Not your average drums
+
+```javascript
+s(`jazz*2,
+insect [crow metal] - -,
+- space:4 - space:1,
+- wind`)
+.cpm(100/2)
+```
+
+Now that we know the basics of how to make beats, let’s look at how we can play notes
+
+### First Notes
+
+Let’s look at how we can play notes
+
+numbers and notes
+
+play notes with numbers
+
+```javascript
+note("48 52 55 59").sound("piano")
+```
+Try out different numbers!
+
+Try decimal numbers, like *55.5*
+
+play notes with letters
+
+```javascript
+note("c e g b").sound("piano")
+```
+Try out different letters (a - g).
+
+Can you find melodies that are actual words? Hint: ☕ 😉 ⚪
+
+add flats or sharps to play the black keys
+
+```javascript
+note("db eb gb ab bb").sound("piano")
+```
+```javascript
+note("c# d# f# g# a#").sound("piano")
+```
+play notes with letters in different octaves
+
+```javascript
+note("c2 e3 g4 b5").sound("piano")
+```
+Try out different octaves (1-8)
+
+If you are not comfortable with the note letter system, it should be easier to use numbers instead. Most of the examples below will use numbers for that reason. We will also look at ways to make it easier to play the right notes later.
+
+changing the sound
+
+Just like with unpitched sounds, we can change the sound of our notes with `sound`:
+
+```javascript
+note("36 43, 52 59 62 64").sound("piano")
+```
+
+Try out different sounds:
+
+*   `gm_electric_guitar_muted`
+*   `gm_acoustic_bass`
+*   `gm_voice_oohs`
+*   `gm_blown_bottle`
+*   `sawtooth`
+*   `square`
+*   `triangle`
+*   how about `bd`, `sd` or `hh`?
+*   remove `.sound('...')` completely
+
+switch between sounds
+
+```javascript
+note("48 67 63 [62, 58]")
+.sound("piano gm_electric_guitar_muted")
+```
+
+stack multiple sounds
+
+```javascript
+note("48 67 63 [62, 58]")
+.sound("piano, gm_electric_guitar_muted")
+```
+
+The note and sound patterns are combined!
+
+We will see more ways to combine patterns later..
+
+Longer Sequences
+
+Divide sequences with / to slow them down
+
+```javascript
+note("[36 34 41 39]/4").sound("gm_acoustic_bass")
+```
+
+The `/4` plays the sequence in brackets over 4 cycles (=8s).
+
+So each of the 4 notes is 2s long.
+
+Try adding more notes inside the brackets and notice how it gets faster.
+
+Play one per cycle with `< ... >`
+
+In the last section, we learned that `< ... >` (angle brackets) can be used to play only one thing per cycle, which is useful for longer melodies too:
+
+```javascript
+note("<36 34 41 39>").sound("gm_acoustic_bass")
+```
+
+Try adding more notes inside the brackets and notice how the tempo stays the same.
+
+The angle brackets are actually just a shortcut:
+
+`<a b c> = [a b c]/3`
+
+`<a b c d> = [a b c d]/4`
+
+…
+
+Play one sequence per cycle
+
+We can combine the 2 types of brackets in all sorts of different ways. Here is an example of a repetitive bassline:
+
+```javascript
+note("<[36 48]*4 [34 46]*4 [41 53]*4 [39 51]*4>")
+.sound("gm_acoustic_bass")
+```
+
+Alternate between multiple things
+
+```javascript
+note("60 <63 62 65 63>")
+.sound("gm_xylophone")
+```
+
+This is also useful for unpitched sounds:
+
+```javascript
+sound("bd*4, [~ <sd cp>]*2, [~ hh]*4")
+.bank("RolandTR909")
+```
+
+Scales
+
+Finding the right notes can be difficult.. Scales are here to help:
+
+```javascript
+n("0 2 4 <[6,8] [7,9]>")
+.scale("C:minor").sound("piano").cpm(60)
+```
+
+Try out different numbers. Any number should sound good!
+
+Try out different scales:
+
+*   C:major
+*   A2:minor
+*   D:dorian
+*   G:mixolydian
+*   A2:minor:pentatonic
+*   F:major:pentatonic
+
+automate scales
+
+Just like anything, we can automate the scale with a pattern:
+
+```javascript
+n("<0 -3>, 2 4 <[6,8] [7,9]>")
+.scale("<C:major D:mixolydian>/4")
+.sound("piano").cpm(60)
+```
+
+If you have no idea what these scale mean, don’t worry. These are just labels for different sets of notes that go well together.
+
+Take your time and you’ll find scales you like!
+
+Repeat & Elongate
+
+Elongate with @
+
+```javascript
+note("c@3 eb").sound("gm_acoustic_bass")
+```
+
+Not using `@` is like using `@1`. In the above example, `c` is 3 units long and `eb` is 1 unit long.
+
+Try changing that number!
+
+Elongate within sub-sequences
+
+```javascript
+n("<[4@2 4] [5@2 5] [6@2 6] [5@2 5]>*2")
+.scale("<C2:mixolydian F2:mixolydian>/4")
+.sound("gm_acoustic_bass").cpm(60)
+```
+
+This groove is called a shuffle. Each beat has two notes, where the first is twice as long as the second. This is also sometimes called triplet swing. You’ll often find it in blues and jazz.
+
+Replicate
+
+```javascript
+note("c!2 [eb,<g a bb a>]").sound("piano").cpm(60)
+```
+
+Try switching between `!`, `*` and `@`
+
+What’s the difference?
+
+Examples
+
+Classy Bassline
+
+```javascript
+note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>")
+.sound("gm_synth_bass_1")
+.lpf(800) // <-- we'll learn about this soon
+```
+
+Classy Melody
+
+```javascript
+n(`<
+[~ 0] 2 [0 2] [~ 2]
+[~ 0] 1 [0 1] [~ 1]
+[~ 0] 3 [0 3] [~ 3]
+[~ 0] 2 [0 2] [~ 2]
+>*4`).scale("C4:minor")
+.sound("gm_synth_strings_1")
+```
+
+Classy Drums
+
+```javascript
+sound("bd*4, [~ <sd cp>]*2, [~ hh]*4")
+.bank("RolandTR909")
+```
+
+If there just was a way to play all the above at the same time…
+
+You can use `$:` 😙
+
+Playing multiple patterns
+
+If you want to play multiple patterns at the same time, make sure to write `$:` before each:
+
+```javascript
+$: note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>")
+.sound("gm_synth_bass_1").lpf(800)
+
+
+$: n(`<
+[~ 0] 2 [0 2] [~ 2]
+[~ 0] 1 [0 1] [~ 1]
+[~ 0] 3 [0 3] [~ 3]
+[~ 0] 2 [0 2] [~ 2]
+>*4`).scale("C4:minor")
+.sound("gm_synth_strings_1")
+
+
+$: sound("bd*4, [~ <sd cp>]*2, [~ hh]*4")
+.bank("RolandTR909")
+```
+
+Try changing `$` to `_$` to mute a part!
+
+This is starting to sound like actual music! We have sounds, we have notes, now the last piece of the puzzle is missing: effects
+
+### First Effects
+
+We have sounds, we have notes, now let’s look at effects!
+
+Some basic effects
+
+low-pass filter
+
+```javascript
+note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>")
+.sound("sawtooth").lpf(800)
+```
+
+`lpf` = low pass filter
+
+Change `lpf` to 200. Notice how it gets muffled. Think of it as standing in front of the club with the door closed 🚪.
+Now let’s open the door… change it to 5000. Notice how it gets brighter ✨🪩
+
+pattern the filter
+
+```javascript
+note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>")
+.sound("sawtooth").lpf("200 1000 200 1000")
+```
+Try adding more values
+Notice how the pattern in `lpf` does not change the overall rhythm
+
+We will learn how to automate with waves later…
+
+vowel
+
+```javascript
+note("<[c3,g3,e4] [bb2,f3,d4] [a2,f3,c4] [bb2,g3,eb4]>")
+.sound("sawtooth").vowel("<a e i o>")
+```
+
+gain
+
+```javascript
+$: sound("hh*16").gain("[.25 1]*4")
+
+
+$: sound("bd*4,[~ sd:1]*2")
+```
+
+Rhythm is all about dynamics!
+
+Remove `.gain(...)` and notice how flat it sounds.
+Bring it back by undoing (ctrl+z)
+
+Let’s combine all of the above into a little tune:
+
+```javascript
+$: sound("hh*8").gain("[.25 1]*4")
+
+
+$: sound("bd*4,[~ sd:1]*2")
+
+
+$: note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>")
+.sound("sawtooth").lpf("200 1000 200 1000")
+
+
+$: note("<[c3,g3,e4] [bb2,f3,d4] [a2,f3,c4] [bb2,g3,eb4]>")
+.sound("sawtooth").vowel("<a e i o>")
+```
+
+shape the sound with an adsr envelope
+
+```javascript
+note("c3 bb2 f3 eb3")
+.sound("sawtooth").lpf(600)
+.attack(.1)
+.decay(.1)
+.sustain(.25)
+.release(.2)
+```
+
+Try to find out what the numbers do.. Compare the following
+
+*   attack: .5 vs 0
+*   decay: .5 vs 0
+*   sustain: 1 vs .25 vs 0
+*   release: 0 vs .5 vs 1
+
+Can you guess what they do?
+
+Click to see solution
+
+adsr short notation
+
+```javascript
+note("c3 bb2 f3 eb3")
+.sound("sawtooth").lpf(600)
+.adsr(".1:.1:.5:.2")
+```
+
+delay
+
+```javascript
+$: note("[~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]]*2")
+.sound("gm_electric_guitar_muted").delay(.5)
+
+
+$: sound("bd rim").bank("RolandTR707").delay(".5")
+```
+
+Try some delay values between 0 and 1. Btw, `.5` is short for *0.5*
+
+What happens if you use `.delay(".8:.125")` ? Can you guess what the second number does?
+
+What happens if you use `.delay(".8:.06:.8")` ? Can you guess what the third number does?
+
+Click to see solution
+
+room aka reverb
+
+```javascript
+n("<4 [3@3 4] [<2 0> ~@16] ~>")
+.scale("D4:minor").sound("gm_accordion:2")
+.room(2)
+```
+
+Try different values!
+
+Add a delay too!
+
+little dub tune
+
+```javascript
+$: note("[~ [<[d3,a3,f4]!2 [d3,bb3,g4]!2> ~]]*2")
+.sound("gm_electric_guitar_muted").delay(.5)
+
+
+$: sound("bd rim").bank("RolandTR707").delay(.5)
+
+
+$: n("<4 [3@3 4] [<2 0> ~@16] ~>")
+.scale("D4:minor").sound("gm_accordion:2")
+.room(2).gain(.4)
+
+
+$: n("[0 [~ 0] 4 [3 2] [0 ~] [0 ~] <0 2> ~]/2")
+.scale("D2:minor")
+.sound("sawtooth,triangle").lpf(800)
+```
+
+Try adding `.hush()` at the end of one of the patterns in the stack…
+
+pan
+
+```javascript
+sound("numbers:1 numbers:2 numbers:3 numbers:4")
+.pan("0 0.3 .6 1")
+```
+
+speed
+
+```javascript
+sound("bd rim [~ bd] rim").speed("<1 2 -1 -2>").room(.2)
+```
+
+fast and slow
+
+We can use `fast` and `slow` to change the tempo of a pattern outside of Mini-Notation:
+
+```javascript
+sound("bd*4,~ rim ~ cp").slow(2)
+```
+
+Change the `slow` value. Try replacing it with `fast`.
+
+What happens if you use a pattern like `.fast("<1 [2 4]>")`?
+
+By the way, inside Mini-Notation, `fast` is `*` and `slow` is `/`.
+
+```javascript
+sound("[bd*4,~ rim ~ cp]*<1 [2 4]>")
+```
+
+modulation with signals
+
+Instead of changing values stepwise, we can also control them with signals:
+
+```javascript
+sound("hh*16").gain(sine)
+```
+
+The basic waveforms for signals are `sine`, `saw`, `square`, `tri` 🌊
+
+Try also random signals `rand` and `perlin`!
+
+The gain is visualized as transparency in the pianoroll.
+
+setting a range
+
+By default, waves oscillate between 0 to 1. We can change that with `range`:
+
+```javascript
+sound("hh*16").lpf(saw.range(500, 2000))
+```
+
+What happens if you flip the range values?
+
+We can change the modulation speed with `slow` / `fast`:
+
+```javascript
+note("<[c2 c3]*4 [bb1 bb2]*4 [f2 f3]*4 [eb2 eb3]*4>")
+.sound("sawtooth")
+.lpf(sine.range(100, 2000).slow(4))
+```
+
+The whole modulation will now take 8 cycles to repeat.
+
+### Pattern Effects
+
+Up until now, most of the functions we’ve seen are what other music programs are typically capable of: sequencing sounds, playing notes, controlling effects.
+
+In this chapter, we are going to look at functions that are more unique to tidal.
+
+reverse patterns with rev
+
+```javascript
+n("0 1 [4 3] 2 0 2 [~ 3] 4").sound("jazz").rev()
+```
+
+play pattern left and modify it right with jux
+
+```javascript
+n("0 1 [4 3] 2 0 2 [~ 3] 4").sound("jazz").jux(rev)
+```
+
+This is the same as:
+
+```javascript
+$: n("0 1 [4 3] 2 0 2 [~ 3] 4").sound("jazz").pan(0)
+$: n("0 1 [4 3] 2 0 2 [~ 3] 4").sound("jazz").pan(1).rev()
+```
+
+Let’s visualize what happens here:
+
+```javascript
+$: n("0 1 [4 3] 2 0 2 [~ 3] 4").sound("jazz").pan(0).color("cyan")
+$: n("0 1 [4 3] 2 0 2 [~ 3] 4").sound("jazz").pan(1).color("magenta").rev()
+```
+
+Try commenting out one of the two by adding `//` before a line
+
+multiple tempos
+
+```javascript
+note("c2, eb3 g3 [bb3 c4]").sound("piano").slow("0.5,1,1.5")
+```
+
+This is like doing
+
+```javascript
+$: note("c2, eb3 g3 [bb3 c4]").s("piano").slow(0.5).color('cyan')
+$: note("c2, eb3 g3 [bb3 c4]").s("piano").slow(1).color('magenta')
+$: note("c2, eb3 g3 [bb3 c4]").s("piano").slow(1.5).color('yellow')
+```
+
+Try commenting out one or more by adding `//` before a line
+
+add
+
+```javascript
+note("c2 [eb3,g3] ".add("<0 <1 -1>>"))
+.color("<cyan <magenta yellow>>").adsr("[.1 0]:.2:[1 0]")
+.sound("gm_acoustic_bass").room(.5).cpm(60)
+```
+
+If you add a number to a note, the note will be treated as if it was a number
+
+We can add as often as we like:
+
+```javascript
+note("c2 [eb3,g3]".add("<0 <1 -1>>").add("0,7"))
+.color("<cyan <magenta yellow>>").adsr("[.1 0]:.2:[1 0]")
+.sound("gm_acoustic_bass").room(.5).cpm(60)
+```
+
+add with scale
+
+```javascript
+n("0 [2 4] <3 5> [~ <4 1>]".add("<0 [0,2,4]>"))
+.scale("C5:minor").release(.5)
+.sound("gm_xylophone").room(.5)
+```
+
+time to stack
+
+```javascript
+$: n("0 [2 4] <3 5> [~ <4 1>]".add("<0 [0,2,4]>"))
+.scale("C5:minor")
+.sound("gm_xylophone")
+.room(.4).delay(.125)
+$: note("c2 [eb3,g3]".add("<0 <1 -1>>"))
+.adsr("[.1 0]:.2:[1 0]")
+.sound("gm_acoustic_bass")
+.room(.5)
+$: n("0 1 [2 3] 2").sound("jazz").jux(rev)
+```
+
+ply
+
+```javascript
+sound("hh hh, bd rim [~ cp] rim").bank("RolandTR707").ply(2)
+```
+
+this is like writing:
+
+```javascript
+sound("hh*2 hh*2, bd*2 rim*2 [~ cp*2] rim*2").bank("RolandTR707")
+```
+
+Try patterning the `ply` function, for example using `<1 2 3>`
+
+off
+
+```javascript
+n("0 [4 <3 2>] <2 3> [~ 1]"
+.off(1/16, x=>x.add(4))
+//.off(1/8, x=>x.add(7))
+).scale("<C5:minor Db5:mixolydian>/2")
+.s("triangle").room(.5).dec(.1)
+```
+
+In the notation `.off(1/16, x=>x.add(4))`, says:
+
+take the original pattern named as `x`
+modify `x` with `.add(4)`, and
+play it offset to the original pattern by 1/16 of a cycle.
+
+`off` is also useful for modifying other sounds, and can even be nested:
+
+```javascript
+s("bd sd [rim bd] sd,[~ hh]*4").bank("CasioRZ1")
+.off(2/16, x=>x.speed(1.5).gain(.25)
+.off(3/16, y=>y.vowel("<a e i o>*8")))
+```
+
+### Workshop Recap
+
+This page is just a listing of all functions covered in the workshop!
+
+Mini Notation
+
+| Concept         | Syntax   | Example                                   |
+| :-------------- | :------- | :---------------------------------------- |
+| Sequence        | space    | ```sound("bd bd sd hh bd cp sd hh")```    |
+| Sample Number   | `:x`     | ```sound("hh:0 hh:1 hh:2 hh:3")```        |
+| Rests           | `~`      | ```sound("metal ~ jazz jazz:1")```        |
+| Sub-Sequences   | `[]`     | ```sound("bd wind [metal jazz] hh")```    |
+| Sub-Sub-Sequences| `[[]]`   | ```sound("bd [metal [jazz sd]]")```     |
+| Speed up        | `*`      | ```sound("bd sd*2 cp*3")```               |
+| Parallel        | `,`      | ```sound("bd*2, hh*2 [hh oh]")```         |
+| Slow down       | `/`      | ```note("[c a f e]/2")```                 |
+| Alternate       | `<>`     | ```note("c <e g>")```                     |
+| Elongate        | `@`      | ```note("c@3 e")```                       |
+| Replicate       | `!`      | ```note("c!3 e")```                       |
+
+Sounds
+
+| Name  | Description                       | Example                               |
+| :---- | :-------------------------------- | :------------------------------------ |
+| sound | plays the sound of the given name | ```sound("bd sd")```                  |
+| bank  | selects the sound bank            | ```sound("bd sd").bank("RolandTR909")```|
+| n     | select sample number              | ```n("0 1 4 2").sound("jazz")```      |
+
+Notes
+
+| Name  | Description                  | Example                             |
+| :---- | :--------------------------- | :---------------------------------- |
+| note  | set pitch as number or letter | ```note("b g e c").sound("piano")``` |
+| n     | set note in scale            | ```n("6 4 2 0").scale("C:minor").sound("piano")```|
+| $:    | play patterns in parallel    | ```$: s("bd sd")\n$: note("c eb g")```|
+
+Audio Effects
+
+| name  | example                                    |
+| :---- | :----------------------------------------- |
+| lpf   | ```note("c2 c3 c2 c3").s("sawtooth").lpf("400 2000")``` |
+| vowel | ```note("c3 eb3 g3").s("sawtooth").vowel("<a e i o>")``` |
+| gain  | ```s("hh*16").gain("[.25 1]*4")```         |
+| delay | ```s("bd rim bd cp").delay(.5)```          |
+| room  | ```s("bd rim bd cp").room(.5)```           |
+| pan   | ```s("bd rim bd cp").pan("0 1")```         |
+| speed | ```s("bd rim bd cp").speed("<1 2 -1 -2>")``` |
+| range | ```s("hh*32").lpf(saw.range(200,4000))```  |
+
+Pattern Effects
+
+| name | description                      | example                                     |
+| :--- | :------------------------------- | :------------------------------------------ |
+| cpm  | sets the tempo in cycles per minute | ```sound("bd sd [~ bd] sd").cpm(45)```      |
+| fast | speed up                         | ```sound("bd sd [~ bd] sd").fast(2)```      |
+| slow | slow down                        | ```sound("bd sd [~ bd] sd").slow(2)```      |
+| rev  | reverse                          | ```n("0 2 4 6").scale("C:minor").rev()```   |
+| jux  | split left/right, modify right   | ```n("0 2 4 6").scale("C:minor").jux(rev)```|
+| add  | add numbers / notes              | ```n("0 2 4 6".add("<0 1 2 1>")).scale("C:minor")```|
+| ply  | speed up each event n times      | ```s("bd sd").ply("<1 2 3>")```             |
+| off  | copy, shift time & modify        | ```s("bd sd, hh*4").off(1/8, x=>x.speed(2))```|
+
+---
+
+## Strudel Blog
+
+Welcome to the Strudel Blog, where we will keep you updated with the latest changes and things happening in the strudelsphere. You can subscribe to this blog using this rss link
+
+Release Notes v1.0.0
+
+January 2024 by froos
+
+These are the release notes for Strudel 1.0.0 aka “Geburtstagskuchen”
+
+This release marks the 2 year anniversary of the project, the first commit was on the 22nd January 2022 by Alex McLean.
+
+If you generally need a heads up on what happened to Strudel in the last year, read the 2023 recap
+
+A lot has happened since then, and also since the last release 16 weeks ago.
+
+Let me write up some of the highlights:
+
+Breaking Change
+
+This version changes the default `cps` value from 1 to 0.5 to give patterns a little bit more time by default. If you find your existing patterns to be suddenly half the speed, just add a `setcps(1)` to the top and it should sound as it did before!
+
+```
+make 0.5hz cps the default by @yaxu in https://codeberg.org/uzu/strudel/pulls/931
+```
+
+New Domain
+
+Strudel is now available under strudel.cc. The old domain still works but you might not get the most recent version.
+
+```
+replace strudel.tidalcycles.org with strudel.cc by @felixroos in https://codeberg.org/uzu/strudel/pulls/768
+```
+
+Strudel on Mastodon
+
+Strudel now has a mastodon presence: https://social.toplap.org/@strudel
+
+New Audio Engine Features
+
+superdough, the audio engine of strudel has gotten some new features:
+
+```
+Create phaser effect by @daslyfe in https://codeberg.org/uzu/strudel/pulls/798
+Multichannel audio by @daslyfe in https://codeberg.org/uzu/strudel/pulls/820
+Audio device selection by @daslyfe in https://codeberg.org/uzu/strudel/pulls/854
+Better convolution reverb by generating impulse responses by @Bubobubobubobubo and @felixroos in https://codeberg.org/uzu/strudel/pulls/718
+Add ‘white’, ‘pink’ and ‘brown’ oscillators + refactor synth by @Bubobubobubobubo and @felixroos in https://codeberg.org/uzu/strudel/pulls/713
+New noise type: “crackle” by @Bubobubobubobubo in https://codeberg.org/uzu/strudel/pulls/806
+Add support for using samples as impulse response buffers for the reverb by @vasilymilovidov in https://codeberg.org/uzu/strudel/pulls/717
+Compressor by @felixroos in https://codeberg.org/uzu/strudel/pulls/729
+Adding vibrato to Superdough sampler by @Bubobubobubobubo and @felixroos in https://codeberg.org/uzu/strudel/pulls/706
+Further Envelope improvements by @daslyfe in https://codeberg.org/uzu/strudel/pulls/868
+Add more vowel qualities for the vowels function by @fnordomat in https://codeberg.org/uzu/strudel/pulls/907
+pitch envelope by @felixroos in https://codeberg.org/uzu/strudel/pulls/913
+```
+
+Slider Controls
+
+The new `slider` function inlines a draggable slider element into the code, bridging the gap between code and GUI.
+
+```
+widgets by @felixroos in https://codeberg.org/uzu/strudel/pulls/714
+Slider afterthoughts by @felixroos in https://codeberg.org/uzu/strudel/pulls/723
+add xfade by @felixroos in https://codeberg.org/uzu/strudel/pulls/780
+```
+
+Improved MIDI integration
+
+Pattern params can now be controlled with cc messages + you can now send a MIDI clock to sync your DAW with strudel.
+
+```
+Midi in by @felixroos in https://codeberg.org/uzu/strudel/pulls/699
+add midi clock support by @felixroos in https://codeberg.org/uzu/strudel/pulls/710
+```
+
+hydra
+
+hydra, the live coding video synth can now be used directly inside the strudel REPL.
+
+```
+Hydra integration by @felixroos in https://codeberg.org/uzu/strudel/pulls/759
+add options param to initHydra by @kasparsj in https://codeberg.org/uzu/strudel/pulls/808
+Hydra fixes and improvements by @atfornes in https://codeberg.org/uzu/strudel/pulls/818
+```
+
+Vanilla REPL
+
+The codemirror editor and the repl abstraction have been refactored from react to vanilla JS! This should give some performance improvements and less dependency / maintenance burden:
+
+```
+Vanilla repl 2 by @felixroos in https://codeberg.org/uzu/strudel/pulls/863
+Vanilla repl 3 by @felixroos in https://codeberg.org/uzu/strudel/pulls/865
+more work on vanilla repl: repl web component + package + MicroRepl by @felixroos in https://codeberg.org/uzu/strudel/pulls/866
+main repl vanillification by @felixroos in https://codeberg.org/uzu/strudel/pulls/873
+final vanillification by @felixroos in https://codeberg.org/uzu/strudel/pulls/876
+```
+
+Doc Changes
+
+Plenty of things have been added to the docs, including a showcase of what people have been done with strudel and the new Community Bakery!
+
+show PRs
+
+Other Features
+There is a lot more
+
+Other Fixes
+show
+
+New Contributors
+@ilesinge made their first contribution in https://codeberg.org/uzu/strudel/pulls/748
+@Dsm0 made their first contribution in https://codeberg.org/uzu/strudel/pulls/773
+@kasparsj made their first contribution in https://codeberg.org/uzu/strudel/pulls/802
+@atfornes made their first contribution in https://codeberg.org/uzu/strudel/pulls/818
+@drewgbarnes made their first contribution in https://codeberg.org/uzu/strudel/pulls/830
+@shiyouganai made their first contribution in https://codeberg.org/uzu/strudel/pulls/843
+@rjulian made their first contribution in https://codeberg.org/uzu/strudel/pulls/894
+@fnordomat made their first contribution in https://codeberg.org/uzu/strudel/pulls/907
+@oscarbyrne made their first contribution in https://codeberg.org/uzu/strudel/pulls/916
+@geikha made their first contribution in https://codeberg.org/uzu/strudel/pulls/924
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.9.0…v1.0.0
+
+2 Years of Strudel
+
+January 2024 by froos
+
+Strudel is now 2 years old! This was the first commit to the strudel repo:
+
+```
+commit 38b5a0d5cdf28685b2b5e18d460772b70246207b
+Author: Alex McLean <alex@slab.org>
+Date:   Sat Jan 22 20:24:36 2022 +0000
+
+Initial commit
+```
+
+I have already written these 2 posts about the first year of strudel:
+
+Introducing Strudel
+1 Year of Strudel
+
+To continue that tradition, let me recap what happened around Strudel in 2023, at least what I have noticed:
+
+ICLC 2023
+
+I presented strudel at the International Conference on Live Coding (ICLC), which took place in April in Utrecht. Here is the (pretty technical) video of my presentation:
+
+For the conference, I wrote a paper with Alex McLean, called Strudel: Live Coding Patterns on the Web. For me personally, this was my first major contact with the live coding scene and it was a very memorable experience!
+
+Workshops and Courses
+
+A lot of workshops have been using strudel in the last year, from many parts of the world: Iceland, UK, Japan, France and the US (probably more I’ve missed). I’ve also given workshops in Switzerland and Germany, where we even had real strudel, thanks to TOPLAP Karlsruhe!
+
+Additionally, there is now a Creative Coding course at Chalmers in Sweden, consisting of “a 10-week series of workshops […] for younger girls to have fun and experiment with code and music”. I was very delighted to see this video of the girls having fun with Strudel:
+
+The course was also encompassed by a study on female empowerement through Creative Coding, read more in Jasmina Maric’s paper “Singing Code”.
+
+Another bigger installment was the (Algo|Afro) Futures programme led by Antonio Roberts, which is “a mentoring programme for early career Black artists who want to explore creative coding and live coding”. For the final concert they recorded this amazing live stream:
+
+I am so happy to see that the project I’ve co-created has had such an impact already, making live coding workshops more easy and accessible. In my opinion, the reasons why people seem to choose strudel for teaching are:
+
+*   it does not require an installation, so it even runs on your phone / tablet or a chromebook
+*   in-code and behind-code visualizations help learners to understand what the system is doing
+*   the interactive documentation
+*   the simple javascript syntax, which is very similar to hydra
+*   tidal’s mini notation for playful expression of rhythms (based on the Bol Processor’s polymetric expressions)
+*   its range of functions for transforming patterns for those getting deeper into exploring strange rhythms
+
+Performances
+
+People are starting to use Strudel for performances, many of which can be watched in the new Showcase! The above photo comes from the Mars College Department of Future Music
+
+New Features
+
+Let’s talk about some of the major features that landed since last year.
+
+Audio Engine Improved
+
+The audio engine has gotten a lot of attention! Once integrated into Strudel itself, the engine has been pulled out and named superdough, the name being based on SuperDirt, which is the audio engine of Tidal. Superdough is now also used by topos, a creation of Raphaël Forment, who helped me implement a bunch of new features. Lately, Jade Rowland has also developed many synthesis features into superdough! Here is a non-exhaustive list of new features:
+
+*   filter envelopes + 24db filter option
+*   pitch envelopes
+*   fm synthesis
+*   wavetable synthesis
+*   phaser
+*   vibrato
+*   noise
+*   an integration of the zzfx synth
+*   compressor
+*   multichannel audio / audio device selection
+
+Here’s an example that shows off filter envelopes:
+
+```javascript
+// "acidic tooth" @by eddyflux
+setcps(1)
+stack(
+note("[<g1 f1>/8](<3 5>,8)")
+.clip(perlin.range(.15,1.5))
+.release(.1)
+.s("sawtooth")
+.lpf(sine.range(400,800).slow(16))
+.lpq(cosine.range(6,14).slow(3))
+.lpenv(sine.mul(4).slow(4))
+.lpd(.2).lpa(.02)
+.ftype('24db')
+.rarely(add(note(12)))
+.room(.2).shape(.3).postgain(.5)
+.superimpose(x=>x.add(note(12)).delay(.5).bpf(1000))
+.gain("[.2 1@3]*2") // fake sidechain
+,
+stack(
+  s("bd*2").mask("<0@4 1@16>"),
+  s("hh*8").gain(saw.mul(saw.fast(2))).clip(sine)
+  .mask("<0@8 1@16>")
+).bank('RolandTR909')
+)
+```
+
+Import Sounds
+
+In the “sounds” tab, you can now press “import sounds” to select sounds from your local disk, allowing you to use your own samples without the need to upload them! Keep in mind that if you share a pattern that uses local samples that the samples will fail to load on other people’s machines..
+
+Community Bakery / Patterns Tab
+
+You can now share your patterns publicly to the Community Bakery, via the “Share” button! The Community Patterns are also listed in the new “patterns”, where you can also save your own patterns locally!
+
+Quality of Life Improvements
+
+You can now change the theme and font of the editor:
+
+You can now enable autocompletion in the settings:
+
+If you enable tooltips, you will get the same info by hovering the mouse over functions while holding the ctrl key!
+
+Another handy thing is that Strudel now has offline support! Even samples will work once you have played them once. More info
+
+New Visualizations
+
+There is now a new `.spiral()` visualization that renders events in a spiral, elevating the cyclical nature of time (+ swirl also means Strudel in german).
+
+Ah yes and you see one of the less readable fonts in this screenshot too :)
+
+The `.scope()` function renders you an oscilloscope:
+
+The pianoroll also got some more options, including the ability to set labels:
+
+Sliders
+
+The `slider` is the first of a family of functions that render UI widgets inline:
+
+```javascript
+note("<c eb g bb>*8")
+.s("sawtooth").lpenv(2).lpq(8)
+.lpf(slider(500, 100, 2000, 1))
+```
+
+Sliders are especially useful for gradual changes like fading things in and out by hand, which is not very practical with just code. The fact that the slider is inside the code and also changes the code itself, makes it feel connected to the rest of the system + doesn’t distract or obstruct from the code. Other widgets will come for sure.
+
+More Voicings
+
+One of my personal goals that got me involved with live coding in the first place is to be able to generate good sounding chord voicings on the fly. Strudel now supports most chord symbols:
+
+```javascript
+chord("<C^9 C7b9 Fm9 Db^7>/2")
+.dict('ireal').voicing()
+.s("sawtooth")
+.lpf(400).lpa(.5).lpenv(4)
+.phaser(4).room(.5)
+```
+
+So far, this is only documented briefly, a more in-depth guide will follow!
+
+Multiplayer / Collaborative Coding
+
+The collaborative live coding editor flok had strudel support early on, thanks to Damián Silvani. Later, I’ve added support for multiple strudel instances, which was merged to the official version just a few days ago. This photo shows a flok jam I did with my workshop participants in basel:
+
+The cool thing about flok is that you can jam with people on the other side of the planet! Here is a recording of the first session we organized over the discord server:
+
+Better MIDI integration
+
+The midi integration has gotten a few new features:
+
+*   clock out to sync your midi devices / DAW to the strudel clock (better doc coming soon)
+*   cc output to send cc values to your gear
+*   cc input to control strudel via MIDI (better doc coming soon)
+
+Here is a little demo of me fiddling with a midi controller, changing a piano pattern:
+
+Experimental Features
+You can now run hydra inside strudel + you can even run strudel in hydra, thanks to Olivia Jack and Ámbar Tenorio Fornés! Read more here
+There is now a VSCode Plugin thanks to roipoussiere! It allows you run patterns from a `.strudel` file inside VSCode.
+Strudel can now be downloaded as a desktop app, thanks to vasilymilovidov who has wrapped the REPL with tauri. You can download it on the releases page (scroll down to Assets). The performance is not optimal on MacOS and Linux, which is why it is still considered experimental
+
+Stats
+
+Let’s end the recap with some naked numbers:
+
+Releases
+0.0.2 Schwindlig
+0.1.0 Stürmisch
+0.0.3 Maelstrom - state of last strudel post
+0.0.4 Gischt
+0.3.0 Donauwelle
+0.4.0 Brandung
+0.5.0 Wirbel
+0.6.0 Zimtschnecke - state after 1 year
+0.7.0 Zuckerguss
+0.8.0 Himbeermuffin
+0.9.0 Bananenbrot
+0.10.0 Kuchenboden
+0.11.0 Kuchengabel
+1.0.0 Geburtstagskuchen - now!
+
+Repo Stats
+3399 commits (+1521)
+427 stars (+243)
+90 forks (+45)
+163 open issues (+110), 186 closed (+100)
+20 open PRs (+18), 515 closed (+292)
+32 contributors (+17)
+12 releases (+4)
+
+Thank you 💗
+
+A big thanks to everyone contributing to this project in one way or another, be it by writing code, fixing typos, asking questions or making sounds! I am very grateful for how all of this came together and I’m looking forward to year 3! If you have some spare cash to support the tidal project, we’d be happy if you can insert some coins here.
+
+Release Notes v0.9.0
+
+September 2023 by froos
+
+These are the release notes for Strudel 0.9.0 aka “Bananenbrot”!
+
+The last release was over 11 weeks ago, so a lot of things have happened!
+
+Let me write up some of the highlights:
+
+Improved Synth Engine
+
+The synth engine has gotten a lot of love + a name: `superdough` encapsulates the web audio based synth / sampler / fx engine into a reusable package, which is already used by Topos. Main new features include:
+
+*   filter envelopes
+*   FM Synthesis
+*   looping samples, allowing wavetable synthesis
+*   vibrato
+*   an integration of ZZFX
+
+Related PRs:
+
+```
+superdough: encapsulates web audio output by @felixroos in https://codeberg.org/uzu/strudel/pulls/664
+basic fm by @felixroos in https://codeberg.org/uzu/strudel/pulls/669
+Wave Selection and Global Envelope on the FM Synth Modulator by @Bubobubobubobubo in https://codeberg.org/uzu/strudel/pulls/683
+control osc partial count with n by @felixroos in https://codeberg.org/uzu/strudel/pulls/674
+ZZFX Synth support by @Bubobubobubobubo in https://codeberg.org/uzu/strudel/pulls/684
+Adding filter envelopes and filter order selection by @Bubobubobubobubo in https://codeberg.org/uzu/strudel/pulls/692
+Adding loop points and thus wavetable synthesis by @Bubobubobubobubo in https://codeberg.org/uzu/strudel/pulls/698
+Adding vibrato to base oscillators by @Bubobubobubobubo in https://codeberg.org/uzu/strudel/pulls/693
+```
+
+Desktop App Improvements
+
+Thanks to @daslyfe and @vasilymilovidov , the desktop app now has its own rust based MIDI and OSC integrations, which do not depend on browser APIs!
+
+You can see superdough, superdirt via OSC + hardware synths via MIDI all together playing in harmony in this awesome video. These are the related PRs:
+
+```
+Create Midi Integration for Tauri Desktop app by @daslyfe in https://codeberg.org/uzu/strudel/pulls/685
+add sleep timer + improve message iterating by @daslyfe in https://codeberg.org/uzu/strudel/pulls/688
+fix MIDI CC messages by @vasilymilovidov in https://codeberg.org/uzu/strudel/pulls/690
+Direct OSC Support in Tauri by @daslyfe in https://codeberg.org/uzu/strudel/pulls/694
+Add logging from tauri by @daslyfe in https://codeberg.org/uzu/strudel/pulls/697
+fix osc bundle timestamp glitches caused by drifting clock by @daslyfe in https://codeberg.org/uzu/strudel/pulls/666
+Midi time fixes by @daslyfe in https://codeberg.org/uzu/strudel/pulls/668
+[Bug Fix] Account for numeral notation when converting to midi by @daslyfe in https://codeberg.org/uzu/strudel/pulls/656
+[Bug Fix] Midi: Don’t treat note 0 as false by @daslyfe in https://codeberg.org/uzu/strudel/pulls/657
+```
+
+Visuals
+2 new FFT based vizualisations have now landed: `scope` and `fscope` (featured in the video at the top).
+pianoroll has new options, see PR
+
+Related PRs:
+
+```
+Scope by @felixroos in https://codeberg.org/uzu/strudel/pulls/677 (demo)
+Pianoroll improvements by @felixroos in https://codeberg.org/uzu/strudel/pulls/679 (demo)
+```
+
+Voicings
+
+There is now a new way to play chord voicings + a huge selection of chord voicings available. Find out more in these PRs:
+
+```
+stateless voicings + tonleiter lib by @felixroos in https://codeberg.org/uzu/strudel/pulls/647 (demo)
+ireal voicings by @felixroos in https://codeberg.org/uzu/strudel/pulls/653 (demo)
+```
+
+Adaptive Highlighting
+
+Thanks to @mindofmatthew , the highlighting will adapt to edits instantly! Related PRs:
+
+```
+More work on highlight IDs by @mindofmatthew in https://codeberg.org/uzu/strudel/pulls/636
+Adaptive Highlighting by @felixroos in https://codeberg.org/uzu/strudel/pulls/634
+```
+
+UI Changes
+```
+teletext theme + fonts by @felixroos in https://codeberg.org/uzu/strudel/pulls/681 (featured in video at the top)
+togglable panel position by @felixroos in https://codeberg.org/uzu/strudel/pulls/667
+```
+
+Other New Features
+```
+slice: list mode by @felixroos in https://codeberg.org/uzu/strudel/pulls/645 (demo)
+add emoji support by @felixroos in https://codeberg.org/uzu/strudel/pulls/680 (demo)
+```
+
+Articles
+```
+Understand pitch by @felixroos in https://codeberg.org/uzu/strudel/pulls/652
+```
+
+Other Fixes & Enhancements
+```
+fix: out of range error by @felixroos in https://codeberg.org/uzu/strudel/pulls/630
+fix: update canvas size on window resize by @felixroos in https://codeberg.org/uzu/strudel/pulls/631
+FIXES: TODO in rotateChroma by @bwagner in https://codeberg.org/uzu/strudel/pulls/650
+snapshot tests: sort haps by part by @felixroos in https://codeberg.org/uzu/strudel/pulls/637
+Delete old packages by @felixroos in https://codeberg.org/uzu/strudel/pulls/639
+update vitest by @felixroos in https://codeberg.org/uzu/strudel/pulls/651
+fix: welcome message for latestCode by @felixroos in https://codeberg.org/uzu/strudel/pulls/659
+fix: always run previous trigger by @felixroos in https://codeberg.org/uzu/strudel/pulls/660
+```
+
+New Contributors
+@daslyfe made their first contribution in https://codeberg.org/uzu/strudel/pulls/656
+@Bubobubobubobubo made their first contribution in https://codeberg.org/uzu/strudel/pulls/683
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.8.0…v0.9.0
+
+Release Notes v0.8.0
+
+June 2023 by froos
+
+These are the release notes for Strudel 0.8.0 aka “Himbeermuffin”!
+
+Go to Tidal Club Forum for this Release
+
+Let me write up some of the highlights:
+
+Desktop App
+
+Besides the REPL (https://strudel.tidalcycles.org/), Strudel is now also distributed as a Desktop App via https://tauri.app/! Thanks to vasilymilovidov!
+
+*   Linux: Debian based
+*   Linux: AppImage
+*   MacOS
+*   Windows .exe
+*   Windows .msi
+
+edit: the desktop app performance on linux is currently not that great.. the web REPL runs much smoother (using firefox or chromium)
+
+The desktop App has the same features as the webapp, with the additional ability to load samples from disk. It is currently not documented yet, but you can do something like
+
+```javascript
+samples('~/music/xxx');
+
+s('my_sound');
+```
+
+You have to start with `~/music/`, followed by an arbitrary folder path that is expected to be present in the systems audio directory. When you first run it, the app will create a `strudel.json` file in that directory to map out the available samples.
+
+I would be very happy to collect some feedback on how it works across different platforms & systems!
+
+Spiral Visualization
+
+Also still undocumented, but you can now visualize patterns as a spiral via `.spiral()`:
+
+This is especially nice because strudel is not only the name of a dessert but also the german word for vortex! The spiral is very fitting to visualize cycles because you can align cycles vertically, while surfing along an infinite twisted timeline.
+
+More settings
+
+In the settings tab, you can now toggle:
+
+*   line numbers
+*   auto-complete
+*   line wrapping
+
+Thanks to roipoussiere!
+
+More
+
+Scroll down to see the full list of Changes!
+
+A big thanks to all the contributors!
+
+Package Versions
+@strudel.cycles/core: 0.8.2
+@strudel.cycles/mini: 0.8.2
+@strudel.cycles/transpiler: 0.8.2
+@strudel.cycles/webaudio: 0.8.2
+@strudel.cycles/soundfonts: 0.8.2
+@strudel.cycles/react: 0.8.0
+@strudel.cycles/midi: 0.8.0
+@strudel.cycles/osc: 0.8.0
+@strudel.cycles/csound: 0.8.0
+@strudel.cycles/serial: 0.8.0
+@strudel.cycles/tonal: 0.8.2
+@strudel.cycles/xen: 0.8.0
+@strudel/codemirror: 0.8.4
+@strudel/web: 0.8.3
+
+What’s Changed
+```
+fix period key for dvorak + remove duplicated code by @felixroos in https://codeberg.org/uzu/strudel/pulls/537
+improve initial loading + wait before eval by @felixroos in https://codeberg.org/uzu/strudel/pulls/538
+do not reset cps before eval #517 by @felixroos in https://codeberg.org/uzu/strudel/pulls/539
+feat: add loader bar to animate loading state by @felixroos in https://codeberg.org/uzu/strudel/pulls/542
+add firacode font by @felixroos in https://codeberg.org/uzu/strudel/pulls/544
+fix: allow whitespace at the end of a mini pattern by @felixroos in https://codeberg.org/uzu/strudel/pulls/547
+fix: reset time on stop by @felixroos in https://codeberg.org/uzu/strudel/pulls/548
+fix: load soundfonts in prebake by @felixroos in https://codeberg.org/uzu/strudel/pulls/550
+fix: colorable highlighting by @felixroos in https://codeberg.org/uzu/strudel/pulls/553
+fix: make soundfonts import dynamic by @felixroos in https://codeberg.org/uzu/strudel/pulls/556
+add basic triads and guidetone voicings by @felixroos in https://codeberg.org/uzu/strudel/pulls/557
+Patchday by @felixroos in https://codeberg.org/uzu/strudel/pulls/559
+Vanilla JS Refactoring by @felixroos in https://codeberg.org/uzu/strudel/pulls/563
+repl: add option to display line numbers by @roipoussiere in https://codeberg.org/uzu/strudel/pulls/582
+learn/tonal: fix typo in “scaleTran[s]pose” by @srenatus in https://codeberg.org/uzu/strudel/pulls/585
+Music metadata by @roipoussiere in https://codeberg.org/uzu/strudel/pulls/580
+New Workshop by @felixroos in https://codeberg.org/uzu/strudel/pulls/587
+Fix option dot by @felixroos in https://codeberg.org/uzu/strudel/pulls/596
+fix: allow f for flat notes like tidal by @felixroos in https://codeberg.org/uzu/strudel/pulls/593
+fix: division by zero by @felixroos in https://codeberg.org/uzu/strudel/pulls/591
+Solmization added by @dariacotocu in https://codeberg.org/uzu/strudel/pulls/570
+improve cursor by @felixroos in https://codeberg.org/uzu/strudel/pulls/597
+enable auto-completion by @roipoussiere in https://codeberg.org/uzu/strudel/pulls/588
+add ratio function by @felixroos in https://codeberg.org/uzu/strudel/pulls/602
+editor: enable line wrapping by @roipoussiere in https://codeberg.org/uzu/strudel/pulls/581
+tonal fixes by @felixroos in https://codeberg.org/uzu/strudel/pulls/607
+fix: flatten scale lists by @felixroos in https://codeberg.org/uzu/strudel/pulls/605
+clip now works like legato in tidal by @felixroos in https://codeberg.org/uzu/strudel/pulls/598
+fix: doc links by @felixroos in https://codeberg.org/uzu/strudel/pulls/612
+tauri desktop app by @vasilymilovidov in https://codeberg.org/uzu/strudel/pulls/613
+add spiral viz by @felixroos in https://codeberg.org/uzu/strudel/pulls/614
+patterning ui settings by @felixroos in https://codeberg.org/uzu/strudel/pulls/606
+Fix typo on packages.mdx by @paikwiki in https://codeberg.org/uzu/strudel/pulls/520
+cps dependent functions by @felixroos in https://codeberg.org/uzu/strudel/pulls/620
+desktop: play samples from disk by @felixroos in https://codeberg.org/uzu/strudel/pulls/621
+fix: midi clock drift by @felixroos in https://codeberg.org/uzu/strudel/pulls/627
+```
+
+New Contributors
+@roipoussiere made their first contribution in https://codeberg.org/uzu/strudel/pulls/582
+@srenatus made their first contribution in https://codeberg.org/uzu/strudel/pulls/585
+@dariacotocu made their first contribution in https://codeberg.org/uzu/strudel/pulls/570
+@vasilymilovidov made their first contribution in https://codeberg.org/uzu/strudel/pulls/613
+@paikwiki made their first contribution in https://codeberg.org/uzu/strudel/pulls/520
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.7.0…v0.8.0
+
+Release Notes v0.7.0
+
+March 2023 by froos
+
+Package Versions
+@strudel.cycles/core@0.7.2
+@strudel.cycles/transpiler@0.7.1
+@strudel.cycles/mini@0.7.2
+@strudel.cycles/tonal@0.7.1
+@strudel.cycles/xen@0.7.1
+@strudel.cycles/tone@0.7.1
+@strudel.cycles/webaudio@0.7.1
+@strudel.cycles/react@0.7.1
+@strudel.cycles/osc@0.7.1
+@strudel.cycles/serial@0.7.1
+@strudel.cycles/midi@0.7.1
+@strudel.cycles/csound@0.7.1
+
+What’s Changed
+```
+pin @csound/browser to 6.18.3 + bump by @felixroos in https://codeberg.org/uzu/strudel/pulls/403
+update csound + fix sound output by @felixroos in https://codeberg.org/uzu/strudel/pulls/404
+fix: share url on subpath by @felixroos in https://codeberg.org/uzu/strudel/pulls/405
+add shabda doc by @felixroos in https://codeberg.org/uzu/strudel/pulls/407
+Update effects.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/410
+improve effects doc by @felixroos in https://codeberg.org/uzu/strudel/pulls/409
+google gtfo by @felixroos in https://codeberg.org/uzu/strudel/pulls/413
+improve samples doc by @felixroos in https://codeberg.org/uzu/strudel/pulls/411
+PWA with offline support by @felixroos in https://codeberg.org/uzu/strudel/pulls/417
+add caching strategy for missing file types + cache all samples loaded from github by @felixroos in https://codeberg.org/uzu/strudel/pulls/419
+add more offline caching by @felixroos in https://codeberg.org/uzu/strudel/pulls/421
+add cdn.freesound to cache list by @felixroos in https://codeberg.org/uzu/strudel/pulls/425
+minirepl: add keyboard shortcuts by @felixroos in https://codeberg.org/uzu/strudel/pulls/429
+Themes by @felixroos in https://codeberg.org/uzu/strudel/pulls/431
+autocomplete preparations by @felixroos in https://codeberg.org/uzu/strudel/pulls/427
+Fix anchors by @felixroos in https://codeberg.org/uzu/strudel/pulls/433
+Update code.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/436
+Update mini-notation.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/437
+Update synths.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/438
+FIXES: Warning about jsxBracketSameLine deprecation by @bwagner in https://codeberg.org/uzu/strudel/pulls/461
+Composable functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/390
+weave and weaveWith by @yaxu in https://codeberg.org/uzu/strudel/pulls/465
+slice and splice by @yaxu in https://codeberg.org/uzu/strudel/pulls/466
+fix: osc should not return a promise by @felixroos in https://codeberg.org/uzu/strudel/pulls/472
+FIXES: freqs instead of pitches by @bwagner in https://codeberg.org/uzu/strudel/pulls/464
+Update input-output.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/471
+settings tab with vim / emacs modes + additional themes and fonts by @felixroos in https://codeberg.org/uzu/strudel/pulls/467
+fix: hash links by @felixroos in https://codeberg.org/uzu/strudel/pulls/473
+midi cc support by @felixroos in https://codeberg.org/uzu/strudel/pulls/478
+Fix array args by @felixroos in https://codeberg.org/uzu/strudel/pulls/480
+docs: packages + offline by @felixroos in https://codeberg.org/uzu/strudel/pulls/482
+Update mini-notation.mdx by @yaxu in https://codeberg.org/uzu/strudel/pulls/365
+Revert “Another attempt at composable functions - WIP (#390)” by @felixroos in https://codeberg.org/uzu/strudel/pulls/484
+fix app height by @felixroos in https://codeberg.org/uzu/strudel/pulls/485
+add algolia creds + optimize sidebar for crawling by @felixroos in https://codeberg.org/uzu/strudel/pulls/488
+refactor react package by @felixroos in https://codeberg.org/uzu/strudel/pulls/490
+react style fixes by @felixroos in https://codeberg.org/uzu/strudel/pulls/491
+implement cps in scheduler by @felixroos in https://codeberg.org/uzu/strudel/pulls/493
+Add control aliases by @yaxu in https://codeberg.org/uzu/strudel/pulls/497
+fix: nano-repl highlighting by @felixroos in https://codeberg.org/uzu/strudel/pulls/501
+Reinstate slice and splice by @yaxu in https://codeberg.org/uzu/strudel/pulls/500
+can now use : as a replacement for space in scales by @felixroos in https://codeberg.org/uzu/strudel/pulls/502
+Support list syntax in mininotation by @yaxu in https://codeberg.org/uzu/strudel/pulls/512
+update react to 18 by @felixroos in https://codeberg.org/uzu/strudel/pulls/514
+add arrange function by @felixroos in https://codeberg.org/uzu/strudel/pulls/508
+Update README.md by @bwagner in https://codeberg.org/uzu/strudel/pulls/474
+add 2 illegible fonts by @felixroos in https://codeberg.org/uzu/strudel/pulls/518
+registerSound API + improved sounds tab + regroup soundfonts by @felixroos in https://codeberg.org/uzu/strudel/pulls/516
+fix: envelopes in chrome by @felixroos in https://codeberg.org/uzu/strudel/pulls/521
+Update samples.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/524
+Update intro.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/525
+fix(footer): fix link to tidalcycles by @revolunet in https://codeberg.org/uzu/strudel/pulls/529
+FIXES: alias pm for polymeter by @bwagner in https://codeberg.org/uzu/strudel/pulls/527
+Maintain random seed state in parser, not globally by @ijc8 in https://codeberg.org/uzu/strudel/pulls/531
+feat: add freq support to gm soundfonts by @felixroos in https://codeberg.org/uzu/strudel/pulls/534
+Update lerna by @felixroos in https://codeberg.org/uzu/strudel/pulls/535
+```
+
+New Contributors
+@revolunet made their first contribution in https://codeberg.org/uzu/strudel/pulls/529
+@ijc8 made their first contribution in https://codeberg.org/uzu/strudel/pulls/531
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.6.0…v0.7.0
+
+Release Notes v0.6.0
+
+February 2023 by froos
+
+Package Versions
+@strudel.cycles/core@0.6.8
+@strudel.cycles/eval@0.6.2
+@strudel.cycles/transpiler@0.6.0
+@strudel.cycles/mini@0.6.0
+@strudel.cycles/tonal@0.6.0
+@strudel.cycles/tone@0.6.0
+@strudel.cycles/xen@0.6.0
+@strudel.cycles/webaudio@0.6.1
+@strudel.cycles/react@0.6.0
+@strudel.cycles/osc@0.6.0
+@strudel.cycles/midi@0.6.0
+@strudel.cycles/webdirt@0.6.0
+@strudel.cycles/serial@0.6.0
+@strudel.cycles/soundfonts@0.6.0
+@strudel.cycles/csound@0.6.0
+
+What’s Changed
+```
+support freq in pianoroll by @felixroos in https://codeberg.org/uzu/strudel/pulls/308
+ICLC2023 paper WIP by @yaxu in https://codeberg.org/uzu/strudel/pulls/306
+fix: copy share link to clipboard was broken for some browsers by @felixroos in https://codeberg.org/uzu/strudel/pulls/311
+Jsdoc component by @felixroos in https://codeberg.org/uzu/strudel/pulls/312
+object support for .scale by @felixroos in https://codeberg.org/uzu/strudel/pulls/307
+Astro build by @felixroos in https://codeberg.org/uzu/strudel/pulls/315
+Reference tab sort by @felixroos in https://codeberg.org/uzu/strudel/pulls/318
+tutorial updates by @jarmitage in https://codeberg.org/uzu/strudel/pulls/320
+support notes without octave by @felixroos in https://codeberg.org/uzu/strudel/pulls/323
+mini repl improvements by @felixroos in https://codeberg.org/uzu/strudel/pulls/324
+fix: workaround Object.assign globalThis by @felixroos in https://codeberg.org/uzu/strudel/pulls/326
+add examples route by @felixroos in https://codeberg.org/uzu/strudel/pulls/327
+add my-patterns by @felixroos in https://codeberg.org/uzu/strudel/pulls/328
+my-patterns build + deploy by @felixroos in https://codeberg.org/uzu/strudel/pulls/329
+my-patterns: fix paths + update readme by @felixroos in https://codeberg.org/uzu/strudel/pulls/330
+improve displaying ‘s’ in pianoroll by @felixroos in https://codeberg.org/uzu/strudel/pulls/331
+fix: can now multiply floats in mini notation by @felixroos in https://codeberg.org/uzu/strudel/pulls/332
+Embed mode improvements by @felixroos in https://codeberg.org/uzu/strudel/pulls/333
+testing + docs docs by @felixroos in https://codeberg.org/uzu/strudel/pulls/334
+Tidy parser, implement polymeters by @yaxu in https://codeberg.org/uzu/strudel/pulls/336
+animation options by @felixroos in https://codeberg.org/uzu/strudel/pulls/337
+move /my-patterns to /swatch by @yaxu in https://codeberg.org/uzu/strudel/pulls/338
+more animate functions + mini repl fix by @felixroos in https://codeberg.org/uzu/strudel/pulls/340
+Patternify euclid, fast, slow and polymeter step parameters in mininotation by @yaxu in https://codeberg.org/uzu/strudel/pulls/341
+fixes #346 by @felixroos in https://codeberg.org/uzu/strudel/pulls/347
+Fix prebake base path by @felixroos in https://codeberg.org/uzu/strudel/pulls/345
+Fix Bjorklund by @yaxu in https://codeberg.org/uzu/strudel/pulls/343
+docs: tidal comparison + add global fx + add missing sampler fx by @felixroos in https://codeberg.org/uzu/strudel/pulls/356
+Fix .out(), renaming webaudio’s out() to webaudio() by @yaxu in https://codeberg.org/uzu/strudel/pulls/361
+Support for multiple mininotation operators by @yaxu in https://codeberg.org/uzu/strudel/pulls/350
+doc structuring by @felixroos in https://codeberg.org/uzu/strudel/pulls/360
+add https to url by @urswilke in https://codeberg.org/uzu/strudel/pulls/364
+document more functions + change arp join by @felixroos in https://codeberg.org/uzu/strudel/pulls/369
+improve new draw logic by @felixroos in https://codeberg.org/uzu/strudel/pulls/372
+Draw fixes by @felixroos in https://codeberg.org/uzu/strudel/pulls/377
+update my-patterns instructions by @felixroos in https://codeberg.org/uzu/strudel/pulls/384
+docs: use note instead of n to mitigate confusion by @felixroos in https://codeberg.org/uzu/strudel/pulls/385
+add run + test + docs by @felixroos in https://codeberg.org/uzu/strudel/pulls/386
+Rename a to angle by @felixroos in https://codeberg.org/uzu/strudel/pulls/387
+document csound by @felixroos in https://codeberg.org/uzu/strudel/pulls/391
+Notes are not essential :) by @yaxu in https://codeberg.org/uzu/strudel/pulls/393
+add ribbon + test + docs by @felixroos in https://codeberg.org/uzu/strudel/pulls/388
+Add tidal-drum-patterns to examples by @urswilke in https://codeberg.org/uzu/strudel/pulls/379
+add pattern methods hurry, press and pressBy by @yaxu in https://codeberg.org/uzu/strudel/pulls/397
+proper builds + use pnpm workspaces by @felixroos in https://codeberg.org/uzu/strudel/pulls/396
+fix: minirepl styles by @felixroos in https://codeberg.org/uzu/strudel/pulls/398
+can now await initAudio + initAudioOnFirstClick by @felixroos in https://codeberg.org/uzu/strudel/pulls/399
+release webaudio by @felixroos in https://codeberg.org/uzu/strudel/pulls/400
+```
+
+New Contributors
+@jarmitage made their first contribution in https://codeberg.org/uzu/strudel/pulls/320
+@urswilke made their first contribution in https://codeberg.org/uzu/strudel/pulls/364
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.5.0…v0.6.0
+
+Release Notes v0.5.0
+
+December 2022 by froos
+
+Package Versions
+@strudel.cycles/core@0.5.0
+@strudel.cycles/osc@0.4.0
+@strudel.cycles/serial@0.3.0
+@strudel.cycles/csound@0.5.1
+@strudel.cycles/eval@0.5.0
+@strudel.cycles/midi@0.5.0
+@strudel.cycles/mini@0.5.0
+@strudel.cycles/react@0.5.0
+@strudel.cycles/soundfonts@0.5.0
+@strudel.cycles/tonal@0.5.0
+@strudel.cycles/tone@0.5.0
+@strudel.cycles/transpiler@0.5.0
+@strudel.cycles/webaudio@0.5.0
+@strudel.cycles/webdirt@0.5.0
+@strudel.cycles/xen@0.5.0
+
+What’s Changed
+```
+Binaries by @felixroos in https://codeberg.org/uzu/strudel/pulls/254
+fix tutorial bugs by @felixroos in https://codeberg.org/uzu/strudel/pulls/263
+fix performance bottleneck by @felixroos in https://codeberg.org/uzu/strudel/pulls/266
+Tidying up core by @yaxu in https://codeberg.org/uzu/strudel/pulls/256
+tonal update with fixed memory leak by @felixroos in https://codeberg.org/uzu/strudel/pulls/272
+add eslint by @felixroos in https://codeberg.org/uzu/strudel/pulls/271
+release version bumps by @felixroos in https://codeberg.org/uzu/strudel/pulls/273
+Support sending CRC16 bytes with serial messages by @yaxu in https://codeberg.org/uzu/strudel/pulls/276
+add licenses / credits to all tunes + remove some by @felixroos in https://codeberg.org/uzu/strudel/pulls/277
+add basic csound output by @felixroos in https://codeberg.org/uzu/strudel/pulls/275
+do not recompile orc by @felixroos in https://codeberg.org/uzu/strudel/pulls/278
+implement collect + arp function by @felixroos in https://codeberg.org/uzu/strudel/pulls/281
+Switch ‘operators’ from .whatHow to .what.how by @yaxu in https://codeberg.org/uzu/strudel/pulls/285
+Fancy hap show, include part in snapshots by @yaxu in https://codeberg.org/uzu/strudel/pulls/291
+Reorganise pattern.mjs with a ‘toplevel first’ regime by @yaxu in https://codeberg.org/uzu/strudel/pulls/286
+add prettier task by @felixroos in https://codeberg.org/uzu/strudel/pulls/296
+Move stuff to new register function by @felixroos in https://codeberg.org/uzu/strudel/pulls/295
+can now add bare numbers to numeral object props by @felixroos in https://codeberg.org/uzu/strudel/pulls/287
+update vitest by @felixroos in https://codeberg.org/uzu/strudel/pulls/297
+remove whitespace from highlighted region by @felixroos in https://codeberg.org/uzu/strudel/pulls/298
+.defragmentHaps() for merging touching haps that share a whole and value by @yaxu in https://codeberg.org/uzu/strudel/pulls/299
+fix whitespace trimming by @felixroos in https://codeberg.org/uzu/strudel/pulls/300
+add freq support to sampler by @felixroos in https://codeberg.org/uzu/strudel/pulls/301
+add lint + prettier check before test by @felixroos in https://codeberg.org/uzu/strudel/pulls/305
+Updated csoundm to use the register facility . by @gogins in https://codeberg.org/uzu/strudel/pulls/303
+```
+
+New Contributors
+@gogins made their first contribution in https://codeberg.org/uzu/strudel/pulls/303
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.4.0…v0.5.0
+
+Release Notes v0.4.0
+
+November 2022 by froos
+
+What’s Changed
+```
+new transpiler based on acorn by @felixroos in https://codeberg.org/uzu/strudel/pulls/249
+Webaudio build by @felixroos in https://codeberg.org/uzu/strudel/pulls/250
+Repl refactoring by @felixroos in https://codeberg.org/uzu/strudel/pulls/255
+```
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.3.0…v0.4.0
+
+Release Notes v0.3.0
+
+November 2022 by froos
+
+Package Versions
+@strudel.cycles/core@0.3.1
+@strudel.cycles/eval@0.3.1
+@strudel.cycles/midi@0.3.1
+@strudel.cycles/mini@0.3.1
+@strudel.cycles/react@0.3.1
+@strudel.cycles/soundfonts@0.3.1
+@strudel.cycles/tonal@0.3.1
+@strudel.cycles/tone@0.3.1
+@strudel.cycles/webaudio@0.3.1
+@strudel.cycles/webdirt@0.3.1
+@strudel.cycles/xen@0.3.1
+
+What’s Changed
+```
+Fix numbers in sampler by @felixroos in https://codeberg.org/uzu/strudel/pulls/196
+document random functions by @felixroos in https://codeberg.org/uzu/strudel/pulls/199
+add rollup-plugin-visualizer to build by @felixroos in https://codeberg.org/uzu/strudel/pulls/200
+add vowel to .out by @felixroos in https://codeberg.org/uzu/strudel/pulls/201
+Coarse crush shape by @felixroos in https://codeberg.org/uzu/strudel/pulls/205
+Webaudio guide by @felixroos in https://codeberg.org/uzu/strudel/pulls/207
+Even more docs by @felixroos in https://codeberg.org/uzu/strudel/pulls/212
+Just another docs PR by @felixroos in https://codeberg.org/uzu/strudel/pulls/215
+sampler features + fixes by @felixroos in https://codeberg.org/uzu/strudel/pulls/217
+samples now have envelopes by @felixroos in https://codeberg.org/uzu/strudel/pulls/218
+encapsulate webaudio output by @felixroos in https://codeberg.org/uzu/strudel/pulls/219
+Fix squeeze join by @yaxu in https://codeberg.org/uzu/strudel/pulls/220
+Feedback Delay by @felixroos in https://codeberg.org/uzu/strudel/pulls/213
+support negative speeds by @felixroos in https://codeberg.org/uzu/strudel/pulls/222
+focus tweak for squeezeJoin - another go at fixing #216 by @yaxu in https://codeberg.org/uzu/strudel/pulls/221
+Reverb by @felixroos in https://codeberg.org/uzu/strudel/pulls/224
+fix fastgap for events that go across cycle boundaries by @yaxu in https://codeberg.org/uzu/strudel/pulls/225
+Core util tests by @mystery-house in https://codeberg.org/uzu/strudel/pulls/226
+Refactor tunes away from tone by @felixroos in https://codeberg.org/uzu/strudel/pulls/230
+Just another docs branch by @felixroos in https://codeberg.org/uzu/strudel/pulls/228
+Patternify range by @yaxu in https://codeberg.org/uzu/strudel/pulls/231
+Out by default by @felixroos in https://codeberg.org/uzu/strudel/pulls/232
+Fix zero length queries WIP by @yaxu in https://codeberg.org/uzu/strudel/pulls/234
+add vcsl sample library by @felixroos in https://codeberg.org/uzu/strudel/pulls/235
+fx on stereo speakers by @felixroos in https://codeberg.org/uzu/strudel/pulls/236
+Tidal drum machines by @felixroos in https://codeberg.org/uzu/strudel/pulls/237
+Object arithmetic by @felixroos in https://codeberg.org/uzu/strudel/pulls/238
+Load samples from url by @felixroos in https://codeberg.org/uzu/strudel/pulls/239
+feat: support github: links by @felixroos in https://codeberg.org/uzu/strudel/pulls/240
+in source example tests by @felixroos in https://codeberg.org/uzu/strudel/pulls/242
+Readme + TLC by @felixroos in https://codeberg.org/uzu/strudel/pulls/244
+patchday by @felixroos in https://codeberg.org/uzu/strudel/pulls/246
+Some tunes by @felixroos in https://codeberg.org/uzu/strudel/pulls/247
+snapshot tests on shared snippets by @felixroos in https://codeberg.org/uzu/strudel/pulls/243
+General purpose scheduler by @felixroos in https://codeberg.org/uzu/strudel/pulls/248
+```
+
+New Contributors
+@mystery-house made their first contribution in https://codeberg.org/uzu/strudel/pulls/226
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.0.4…v0.3.0
+
+Release Notes v0.0.4
+
+August 2022 by froos
+
+What’s Changed
+```
+Webaudio rewrite by @felixroos in https://codeberg.org/uzu/strudel/pulls/138
+Fix createParam() by @yaxu in https://codeberg.org/uzu/strudel/pulls/140
+Soundfont Support by @felixroos in https://codeberg.org/uzu/strudel/pulls/139
+Serial twiddles by @yaxu in https://codeberg.org/uzu/strudel/pulls/141
+Pianoroll Object Support by @felixroos in https://codeberg.org/uzu/strudel/pulls/142
+flash effect on ctrl enter by @felixroos in https://codeberg.org/uzu/strudel/pulls/144
+can now generate short link for sharing by @felixroos in https://codeberg.org/uzu/strudel/pulls/146
+Sampler optimizations and more by @felixroos in https://codeberg.org/uzu/strudel/pulls/148
+Final update to demo.pdf by @yaxu in https://codeberg.org/uzu/strudel/pulls/151
+add webdirt drum samples to prebake for general availability by @larkob in https://codeberg.org/uzu/strudel/pulls/150
+update to tutorial documentation by @larkob in https://codeberg.org/uzu/strudel/pulls/162
+add chooseInWith/chooseCycles by @yaxu in https://codeberg.org/uzu/strudel/pulls/166
+fix: jsdoc comments by @felixroos in https://codeberg.org/uzu/strudel/pulls/169
+Pianoroll fixes by @felixroos in https://codeberg.org/uzu/strudel/pulls/163
+Talk fixes by @felixroos in https://codeberg.org/uzu/strudel/pulls/164
+Amend shapeshifter to allow use of dynamic import by @debrisapron in https://codeberg.org/uzu/strudel/pulls/171
+add more shapeshifter flags by @felixroos in https://codeberg.org/uzu/strudel/pulls/99
+Replace react-codemirror6 with @uiw/react-codemirror by @felixroos in https://codeberg.org/uzu/strudel/pulls/173
+fix some annoying bugs by @felixroos in https://codeberg.org/uzu/strudel/pulls/177
+incorporate elements of randomness to the mini notation by @bpow in https://codeberg.org/uzu/strudel/pulls/165
+replace mocha with vitest by @felixroos in https://codeberg.org/uzu/strudel/pulls/175
+scheduler improvements by @felixroos in https://codeberg.org/uzu/strudel/pulls/181
+Fix codemirror bug by @felixroos in https://codeberg.org/uzu/strudel/pulls/186
+wait for prebake to finish before evaluating by @felixroos in https://codeberg.org/uzu/strudel/pulls/189
+fix regression: old way of setting frequencies was broken by @felixroos in https://codeberg.org/uzu/strudel/pulls/190
+Soundfont file support by @felixroos in https://codeberg.org/uzu/strudel/pulls/183
+change “stride”/“offset” of successive degradeBy/chooseIn by @bpow in https://codeberg.org/uzu/strudel/pulls/185
+```
+
+New Contributors
+@larkob made their first contribution in https://codeberg.org/uzu/strudel/pulls/150
+@debrisapron made their first contribution in https://codeberg.org/uzu/strudel/pulls/171
+@bpow made their first contribution in https://codeberg.org/uzu/strudel/pulls/165
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.0.3…v0.0.4
+
+Release Notes v0.0.3
+
+June 2022 by froos
+
+What’s Changed
+```
+Add chunk, chunkBack and iterBack by @yaxu in https://codeberg.org/uzu/strudel/pulls/25
+Update tutorial.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/37
+Update tutorial.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/38
+Compose by @felixroos in https://codeberg.org/uzu/strudel/pulls/40
+Fix polymeter by @yaxu in https://codeberg.org/uzu/strudel/pulls/44
+First run at squeezeBind, ref #32 by @yaxu in https://codeberg.org/uzu/strudel/pulls/48
+Implement chop() by @yaxu in https://codeberg.org/uzu/strudel/pulls/50
+OSC and SuperDirt support by @yaxu in https://codeberg.org/uzu/strudel/pulls/27
+More functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/56
+More functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/61
+Separate out strudel.mjs, make index.mjs aggregate module by @yaxu in https://codeberg.org/uzu/strudel/pulls/62
+Speech output by @felixroos in https://codeberg.org/uzu/strudel/pulls/67
+use new fixed version of osc-js package by @felixroos in https://codeberg.org/uzu/strudel/pulls/68
+First effort at rand() by @yaxu in https://codeberg.org/uzu/strudel/pulls/69
+More randomness, fix rand, and add brand, irand and choose by @yaxu in https://codeberg.org/uzu/strudel/pulls/70
+webaudio package by @felixroos in https://codeberg.org/uzu/strudel/pulls/26
+Port perlin noise, rangex, and palindrome by @yaxu in https://codeberg.org/uzu/strudel/pulls/73
+More random functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/74
+Try to fix appLeft / appRight by @yaxu in https://codeberg.org/uzu/strudel/pulls/75
+Basic webserial support by @yaxu in https://codeberg.org/uzu/strudel/pulls/80
+Webaudio in REPL by @felixroos in https://codeberg.org/uzu/strudel/pulls/77
+add striate() by @yaxu in https://codeberg.org/uzu/strudel/pulls/76
+Tidy up a couple of old files by @mindofmatthew in https://codeberg.org/uzu/strudel/pulls/84
+Add pattern composers, implements #82 by @yaxu in https://codeberg.org/uzu/strudel/pulls/83
+Fiddles with cat/stack by @yaxu in https://codeberg.org/uzu/strudel/pulls/90
+Paper by @felixroos in https://codeberg.org/uzu/strudel/pulls/98
+Change to Affero GPL by @yaxu in https://codeberg.org/uzu/strudel/pulls/101
+Work on Codemirror 6 highlighting by @mindofmatthew in https://codeberg.org/uzu/strudel/pulls/102
+Codemirror 6 by @felixroos in https://codeberg.org/uzu/strudel/pulls/97
+Tune tests by @felixroos in https://codeberg.org/uzu/strudel/pulls/104
+/embed package: web component for repl by @felixroos in https://codeberg.org/uzu/strudel/pulls/106
+Reset, Restart and other composers by @felixroos in https://codeberg.org/uzu/strudel/pulls/88
+Embed style by @felixroos in https://codeberg.org/uzu/strudel/pulls/109
+In source doc by @yaxu in https://codeberg.org/uzu/strudel/pulls/105
+.brak(), .inside() and .outside() by @yaxu in https://codeberg.org/uzu/strudel/pulls/112
+loopAt by @yaxu in https://codeberg.org/uzu/strudel/pulls/114
+Osc timing improvements by @yaxu in https://codeberg.org/uzu/strudel/pulls/113
+react package + vite build by @felixroos in https://codeberg.org/uzu/strudel/pulls/116
+In source doc by @felixroos in https://codeberg.org/uzu/strudel/pulls/117
+fix: #108 by @felixroos in https://codeberg.org/uzu/strudel/pulls/123
+fix: #122 ctrl enter would add newline by @felixroos in https://codeberg.org/uzu/strudel/pulls/124
+Webdirt by @felixroos in https://codeberg.org/uzu/strudel/pulls/121
+Fix link to contributing to tutorial docs by @stephendwolff in https://codeberg.org/uzu/strudel/pulls/129
+Pianoroll enhancements by @felixroos in https://codeberg.org/uzu/strudel/pulls/131
+add createParam + createParams by @felixroos in https://codeberg.org/uzu/strudel/pulls/110
+remove cycle + delta from onTrigger by @felixroos in https://codeberg.org/uzu/strudel/pulls/135
+Scheduler improvements by @felixroos in https://codeberg.org/uzu/strudel/pulls/134
+add onTrigger helper by @felixroos in https://codeberg.org/uzu/strudel/pulls/136
+```
+
+New Contributors
+@bwagner made their first contribution in https://codeberg.org/uzu/strudel/pulls/37
+@mindofmatthew made their first contribution in https://codeberg.org/uzu/strudel/pulls/84
+@stephendwolff made their first contribution in https://codeberg.org/uzu/strudel/pulls/129
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.0.2…v0.0.3
+
+Release Notes v0.0.3
+
+May 2022 by froos
+
+What’s Changed
+```
+Add chunk, chunkBack and iterBack by @yaxu in https://codeberg.org/uzu/strudel/pulls/25
+Update tutorial.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/37
+Update tutorial.mdx by @bwagner in https://codeberg.org/uzu/strudel/pulls/38
+Compose by @felixroos in https://codeberg.org/uzu/strudel/pulls/40
+Fix polymeter by @yaxu in https://codeberg.org/uzu/strudel/pulls/44
+First run at squeezeBind, ref #32 by @yaxu in https://codeberg.org/uzu/strudel/pulls/48
+Implement chop() by @yaxu in https://codeberg.org/uzu/strudel/pulls/50
+OSC and SuperDirt support by @yaxu in https://codeberg.org/uzu/strudel/pulls/27
+More functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/56
+More functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/61
+Separate out strudel.mjs, make index.mjs aggregate module by @yaxu in https://codeberg.org/uzu/strudel/pulls/62
+Speech output by @felixroos in https://codeberg.org/uzu/strudel/pulls/67
+use new fixed version of osc-js package by @felixroos in https://codeberg.org/uzu/strudel/pulls/68
+First effort at rand() by @yaxu in https://codeberg.org/uzu/strudel/pulls/69
+More randomness, fix rand, and add brand, irand and choose by @yaxu in https://codeberg.org/uzu/strudel/pulls/70
+webaudio package by @felixroos in https://codeberg.org/uzu/strudel/pulls/26
+Port perlin noise, rangex, and palindrome by @yaxu in https://codeberg.org/uzu/strudel/pulls/73
+More random functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/74
+Try to fix appLeft / appRight by @yaxu in https://codeberg.org/uzu/strudel/pulls/75
+Basic webserial support by @yaxu in https://codeberg.org/uzu/strudel/pulls/80
+Webaudio in REPL by @felixroos in https://codeberg.org/uzu/strudel/pulls/77
+add striate() by @yaxu in https://codeberg.org/uzu/strudel/pulls/76
+Tidy up a couple of old files by @mindofmatthew in https://codeberg.org/uzu/strudel/pulls/84
+Add pattern composers, implements #82 by @yaxu in https://codeberg.org/uzu/strudel/pulls/83
+Fiddles with cat/stack by @yaxu in https://codeberg.org/uzu/strudel/pulls/90
+Paper by @felixroos in https://codeberg.org/uzu/strudel/pulls/98
+Change to Affero GPL by @yaxu in https://codeberg.org/uzu/strudel/pulls/101
+Work on Codemirror 6 highlighting by @mindofmatthew in https://codeberg.org/uzu/strudel/pulls/102
+Codemirror 6 by @felixroos in https://codeberg.org/uzu/strudel/pulls/97
+Tune tests by @felixroos in https://codeberg.org/uzu/strudel/pulls/104
+/embed package: web component for repl by @felixroos in https://codeberg.org/uzu/strudel/pulls/106
+Reset, Restart and other composers by @felixroos in https://codeberg.org/uzu/strudel/pulls/88
+Embed style by @felixroos in https://codeberg.org/uzu/strudel/pulls/109
+In source doc by @yaxu in https://codeberg.org/uzu/strudel/pulls/105
+.brak(), .inside() and .outside() by @yaxu in https://codeberg.org/uzu/strudel/pulls/112
+loopAt by @yaxu in https://codeberg.org/uzu/strudel/pulls/114
+Osc timing improvements by @yaxu in https://codeberg.org/uzu/strudel/pulls/113
+```
+
+New Contributors
+@bwagner made their first contribution in https://codeberg.org/uzu/strudel/pulls/37
+@mindofmatthew made their first contribution in https://codeberg.org/uzu/strudel/pulls/84
+
+Full Changelog: https://codeberg.org/uzu/strudel/compare/v0.0.2…@strudel.cycles/core@0.1.0
+
+Release Notes v0.0.2
+
+March 2022 by froos
+
+What’s Changed
+```
+Most work done as commits to main
+repl + reify functions by @felixroos in https://codeberg.org/uzu/strudel/pulls/2
+Fix path by @yaxu in https://codeberg.org/uzu/strudel/pulls/3
+update readme for local dev by @kindohm in https://codeberg.org/uzu/strudel/pulls/4
+Patternify all the things by @yaxu in https://codeberg.org/uzu/strudel/pulls/5
+krill parser + improved repl by @felixroos in https://codeberg.org/uzu/strudel/pulls/6
+fixed editor crash by @felixroos in https://codeberg.org/uzu/strudel/pulls/7
+timeCat by @yaxu in https://codeberg.org/uzu/strudel/pulls/8
+Bugfix every, and create more top level functions by @yaxu in https://codeberg.org/uzu/strudel/pulls/9
+Failing test for when WIP by @yaxu in https://codeberg.org/uzu/strudel/pulls/10
+Added mask() and struct() by @yaxu in https://codeberg.org/uzu/strudel/pulls/11
+Add continuous signals (sine, cosine, saw, etc) by @yaxu in https://codeberg.org/uzu/strudel/pulls/13
+add apply and layer, and missing div/mul methods by @yaxu in https://codeberg.org/uzu/strudel/pulls/15
+higher latencyHint by @felixroos in https://codeberg.org/uzu/strudel/pulls/16
+test: 📦 Add missing dependency and a CI check, to prevent oversights ;p by @puria in https://codeberg.org/uzu/strudel/pulls/17
+fix: 💄 Enhance visualisation of the Tutorial on mobile by @puria in https://codeberg.org/uzu/strudel/pulls/19
+Stateful queries and events (WIP) by @yaxu in https://codeberg.org/uzu/strudel/pulls/14
+Fix resolveState by @yaxu in https://codeberg.org/uzu/strudel/pulls/22
+added _asNumber + interpret numbers as midi by @felixroos in https://codeberg.org/uzu/strudel/pulls/21
+Update package.json by @ChiakiUehira in https://codeberg.org/uzu/strudel/pulls/23
+packaging by @felixroos in https://codeberg.org/uzu/strudel/pulls/24
+```
+
+New Contributors
+@felixroos made their first contribution in https://codeberg.org/uzu/strudel/pulls/2
+@kindohm made their first contribution in https://codeberg.org/uzu/strudel/pulls/4
+@puria made their first contribution in https://codeberg.org/uzu/strudel/pulls/17
+@ChiakiUehira made their first contribution in https://codeberg.org/uzu/strudel/pulls/23
+
+Full Changelog: https://codeberg.org/uzu/strudel/commit/2a0d8c3f77ff7b34e82602e2d02400707f367316
+```
